@@ -9,14 +9,12 @@ function Home(props) {
     const [selectedPlayers, setSelectedPlayers] = useState([]);
     const [buttonDisabled, setButtonDisabled] = useState(true);
     const [startClicked, setStartClicked] = useState(false)
-    const [changedPlayers, setChangedPlayers] = useState([])
 
     const url = 'https://s3-ap-southeast-1.amazonaws.com/he-public-data/bets7747a43.json';
 
     useEffect(() => {
         axios.get(url)
             .then((response) => {
-                console.log(response);
                 setPlayers(response.data)
             })
             .catch((err) => {
@@ -25,7 +23,7 @@ function Home(props) {
     }, [])
 
     useEffect(() => {
-        if (selectedPlayers.length === 9) {
+        if (selectedPlayers.length > 3) {
             setButtonDisabled(false);
         } else {
             setButtonDisabled(true)
@@ -54,26 +52,20 @@ function Home(props) {
                 })
             })
         }
-
     }
 
-    function handleStart(){
-       setStartClicked(true);
+    function handleStart() {
+        setStartClicked(true);
     }
 
-    function handleChangedPlayers(playersFromWinners){
-        console.log(playersFromWinners);
-        setChangedPlayers(playersFromWinners);
-    }
-
-    if(startClicked){
-        return <Redirect to={{ pathname:'/winner', state: {selectedPlayers: selectedPlayers, handleChangedPlayers: handleChangedPlayers}}} />
+    if (startClicked) {
+        return <Redirect to={{ pathname: '/winner', state: { selectedPlayers: selectedPlayers }}} />
     }
 
     return (
         <div className="row">
             <div className="col-4" style={{ backgroundColor: "lightgray" }}>
-                <img style={{ height: "100px", width: "100px", display: "block" }} className="m-4 mx-auto" src="https://cdn.iconscout.com/icon/premium/png-256-thumb/dice-266-799783.png" alt="dice image" />
+                <img style={{ height: "100px", width: "100px", display: "block" }} className="m-4 mx-auto" src="https://cdn.iconscout.com/icon/premium/png-256-thumb/dice-266-799783.png" alt="dice" />
                 <div className="m-4">
                     <table className="table">
                         <tbody>
@@ -87,13 +79,13 @@ function Home(props) {
                             })}
                         </tbody>
                     </table>
-                    
+
                     <button onClick={handleStart} className="btn btn-block btn-dark" disabled={buttonDisabled} >START</button>
                 </div>
             </div>
 
             <div className="col-8">
-                <h3 className="text-dark m-3">Select Playing 9</h3>
+                <h3 className="text-dark m-3">Select Atleast 4 to Play</h3>
                 <div className="m-4">
                     <table className="table table-striped">
                         <thead>
@@ -121,7 +113,7 @@ function Home(props) {
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default Home;

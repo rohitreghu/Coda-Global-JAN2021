@@ -7,6 +7,10 @@
 
   <!-- Font Awesome CDN -->
   <script src="https://use.fontawesome.com/c9137564a6.js"></script>
+  <script>
+    // See https://github.com/facebook/react/issues/20829#issuecomment-802088260
+    if (!crossOriginIsolated) SharedArrayBuffer = ArrayBuffer;
+  </script>
 
   <link rel="icon" href="https://coda.global/assets/svg/Group%202255.svg">
   <link rel="stylesheet" href="styles.css" />
