@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 
+import Pagination from './Pagination';
 
 function Home(props) {
 
@@ -14,13 +15,22 @@ function Home(props) {
     const [sortBet, setSortBet] = useState(null);
     const [sortPrice, setSortPrice] = useState(null);
 
+    // For pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [playersPerPage] = useState(7);
+
     const arrowUp = "fa fa-arrow-up";
     const arrowDown = "fa fa-arrow-down";
 
+    // Bet and Price sort icon
     const [betArrow, setBetArrow] = useState("bi bi-arrow-down-up");
     const [priceArrow, setPriceArrow] = useState("bi bi-arrow-down-up");
 
     const url = 'https://s3-ap-southeast-1.amazonaws.com/he-public-data/bets7747a43.json';
+
+    const indexOfLastPost = currentPage * playersPerPage;
+    const indexOfFirstPost = indexOfLastPost - playersPerPage;
+    const paginatedPlayers = displayedPlayers.slice(indexOfFirstPost, indexOfLastPost);
 
     useEffect(() => {
         if (props.location.state) {
@@ -53,7 +63,7 @@ function Home(props) {
     }, [props.location.state])
 
     useEffect(() => {
-        if (selectedPlayers.length > 3) {
+        if (selectedPlayers.length > 3 && selectedPlayers.length < 10) {
             setButtonDisabled(false);
         } else {
             setButtonDisabled(true)
@@ -73,6 +83,7 @@ function Home(props) {
             } else {
                 setDisplayedPlayers(players)
             }
+            setCurrentPage(1);
         }, 500)
 
         return () => {
@@ -80,28 +91,29 @@ function Home(props) {
         }
     }, [searchTerm, players])
 
-    function handleCheckbox(event) {
-        const { checked, name } = event.target;
-        var checkedPlayer = null;
+    function handleAdd(event) {
+        const { name } = event.target;
 
-        if (checked) {
-            for (let i = 0; i < displayedPlayers.length; i++) {
-                if (players[i].Name === name) {
-                    checkedPlayer = displayedPlayers[i];
+        for (let i = 0; i < displayedPlayers.length; i++) {
+            if (displayedPlayers[i].Name === name) {
+                if (!selectedPlayers.includes(displayedPlayers[i])) {
+                    setSelectedPlayers((prevValue) => {
+                        return [...prevValue, displayedPlayers[i]]
+                    })
                     break;
                 }
             }
-
-            setSelectedPlayers((prevValue) => {
-                return [...prevValue, checkedPlayer]
-            })
-        } else {
-            setSelectedPlayers((prevValue) => {
-                return prevValue.filter((player) => {
-                    return player.Name !== name;
-                })
-            })
         }
+    }
+
+    const handleRemove = (event) => {
+        const { name } = event.target;
+
+        setSelectedPlayers((prevValue) => {
+            return prevValue.filter((player) => {
+                return player.Name !== name;
+            })
+        })
     }
 
     function handleStart() {
@@ -111,6 +123,8 @@ function Home(props) {
     const handleSort = (e) => {
 
         const { id } = e.target;
+
+        setCurrentPage(1);
 
         if (id === "Bet") {
             if (sortBet) {
@@ -137,6 +151,18 @@ function Home(props) {
         }
     }
 
+    const paginate = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    }
+
+    const handleNext = () => {
+        setCurrentPage(currentPage + 1)
+    }
+
+    const handlePrev = () => {
+        setCurrentPage(currentPage - 1)
+    }
+
 
     if (startClicked) {
         return <Redirect to={{ pathname: '/winner', state: { selectedPlayers: selectedPlayers } }} />
@@ -144,29 +170,33 @@ function Home(props) {
 
     return (
         <div className="container-fluid">
-            <div className="row">
+            <div className="row" style={{ height: "100vh" }}>
                 <div className="col-4" style={{ backgroundColor: "lightgray" }}>
                     <img style={{ height: "100px", width: "100px", display: "block" }} className="m-4 mx-auto" src="https://cdn.iconscout.com/icon/premium/png-256-thumb/dice-266-799783.png" alt="dice" />
+                    <h3 className="text-dark m-3 justify-content-center">Selected Players</h3>
                     <div className="m-4">
-                        <table className="table">
-                            <tbody>
-                                {selectedPlayers.map((player, index) => {
-                                    return <tr key={index}>
-                                        <td>{player.Name}</td>
-                                        <td><img src={player['Profile Image']} alt='Player Avatar' style={{ height: "20px", width: "20px" }} /></td>
-                                        <td>{player.Bet} <span className="text-warning"><i className="fa fa-bullseye" aria-hidden="true"></i></span></td>
-                                        <td>{player.Price} <span className="text-warning"><i className="fa fa-money" aria-hidden="true"></i></span></td>
-                                    </tr>
-                                })}
-                            </tbody>
-                        </table>
+                        <div className="table-responsive">
+                            <table className="table">
+                                <tbody>
+                                    {selectedPlayers.map((player, index) => {
+                                        return <tr key={index}>
+                                            <td>{player.Name}</td>
+                                            <td><img src={player['Profile Image']} alt='Player Avatar' style={{ height: "20px", width: "20px" }} /></td>
+                                            <td>{player.Bet} <span className="text-warning"><i className="fa fa-bullseye" aria-hidden="true"></i></span></td>
+                                            <td>{player.Price} <span className="text-warning"><i className="fa fa-money" aria-hidden="true"></i></span></td>
+                                            <td><button className="btn btn-sm btn-secondary" name={player.Name} onClick={handleRemove}>Remove</button></td>
+                                        </tr>
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
 
                         <button onClick={handleStart} className="btn btn-block btn-dark" disabled={buttonDisabled} >START</button>
                     </div>
                 </div>
 
                 <div className="col-8">
-                    <h3 className="text-dark m-3">Select Atleast 4 to Play</h3>
+                    <h3 className="text-dark m-3 justify-content-center">Select 4 - 9 Players to Play</h3>
 
                     <div className="form-group m-3">
                         <input
@@ -185,30 +215,32 @@ function Home(props) {
                                     <th scope="col">SELECT</th>
                                     <th scope="col">PLAYER NAME</th>
                                     <th scope="col">AVATAR</th>
-                                    <th
-                                        scope="col"
-                                        id="Bet"
-                                        onClick={e => handleSort(e)}
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        <i className={betArrow} ></i>
-                                        BET
+                                    <th scope="col">
+                                        <div
+                                            id="Bet"
+                                            onClick={e => handleSort(e)}
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            <i className={betArrow} ></i>
+                                            BET
+                                        </div>
                                     </th>
-                                    <th
-                                        scope="col"
-                                        id="Price"
-                                        onClick={e => handleSort(e)}
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                    <i className={`fa ${priceArrow}`} ></i>
-                                        PRICE
+                                    <th scope="col">
+                                    <div
+                                            id="Price"
+                                            onClick={e => handleSort(e)}
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            <i className={priceArrow} ></i>
+                                            Price
+                                        </div>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {displayedPlayers.map((player, index) => {
+                                {paginatedPlayers.map((player, index) => {
                                     return <tr key={index}>
-                                        <td  ><input name={player.Name} type="checkbox" onChange={handleCheckbox}></input></td>
+                                        <td  ><button className="btn btn-secondary btn-sm" name={player.Name} onClick={handleAdd}>Add</button></td>
                                         <td>{player.Name}</td>
                                         <td><img src={player['Profile Image']} alt='Player Avatar' style={{ height: "30px", width: "30px" }} /></td>
                                         <td>{player.Bet} <span className="text-warning"><i className="fa fa-bullseye" aria-hidden="true"></i></span></td>
@@ -218,6 +250,14 @@ function Home(props) {
 
                             </tbody>
                         </table>
+                        <Pagination
+                            playersPerPage={playersPerPage}
+                            totalPlayers={displayedPlayers.length}
+                            paginate={paginate}
+                            handleNext={handleNext}
+                            handlePrev={handlePrev}
+                            currentPage={currentPage}
+                        />
                     </div>
                 </div>
             </div>

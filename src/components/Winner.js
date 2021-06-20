@@ -40,33 +40,38 @@ function Winner(props) {
         </tr>
     })
 
-
     if (backClicked) {
         return <Redirect to={{ pathname: '/home', state: { selectedPlayers: selectedPlayers } }} />
     }
 
-    return <div>
-        <div>
-            <div className="dice">{dice}</div>
-            <div className="m-4">
-                <table className="table table-striped">
-                    <thead>
-                        <tr>
-                            <th scope="col">PLAYER NAME</th>
-                            <th scope="col">AVATAR</th>
-                            <th scope="col">BET</th>
-                            <th scope="col">PRICE</th>
-                            <th scope="col">STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {renderedPlayers}
-                    </tbody>
-                </table>
+    return (
+        <div className="container-fluid" >
+            <div className="row mt-3">
+                <div className="col-10 offset-1">
+                    <div>
+                        <div className="d-flex justify-content-center display-4">Opposing Bet: {dice}</div>
+                        <div className="m-4">
+                            <table className="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">PLAYER NAME</th>
+                                        <th scope="col">AVATAR</th>
+                                        <th scope="col">BET</th>
+                                        <th scope="col">PRICE</th>
+                                        <th scope="col">STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {renderedPlayers}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <button onClick={handleBack} className="btn btn-block btn-dark">BACK</button>
+                </div>
             </div>
         </div>
-        <button onClick={handleBack} className="btn btn-block btn-dark">BACK</button>
-    </div>
-}
+    );
+};
 
 export default Winner;
